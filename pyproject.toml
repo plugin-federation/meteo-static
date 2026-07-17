@@ -1,0 +1,17 @@
+[project]
+name = "meteo-static"
+version = "0.1.0"
+description = "Mock meteorological MCP server with fixed weather data"
+requires-python = ">=3.11"
+dependencies = ["mcp>=1.0.0"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true

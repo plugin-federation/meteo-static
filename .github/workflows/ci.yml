@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    uses: plugin-federation/plugin-federation-actions/.github/workflows/mcp-server-ci.yml@v0
+    with:
+      python-version: "3.12"
+      requirements: "requirements.txt"
+      server-command: "python src/server.py"
+      min-tools: "3"
+      expected-tools: "list_cities,get_weather,get_forecast"
