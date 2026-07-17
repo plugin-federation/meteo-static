@@ -40,3 +40,4 @@ This repo has CI workflows under `.github/workflows/` that validate:
 
 - **Working** — both transports functional
 - **Tools** — 3 tools with complete JSON schemas
+- **CI** — lint, type-check, tool validation via plugin-federation-actions
