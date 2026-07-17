@@ -25,7 +25,7 @@ CITIES: dict[str, dict[str, Any]] = {
         "country": "JP",
         "lat": 35.68,
         "lon": 139.69,
-        "temp_c": 8.0,
+        "temp_c": 8.5,
         "feels_like_c": 5.0,
         "humidity_pct": 62,
         "wind_kph": 15.0,
