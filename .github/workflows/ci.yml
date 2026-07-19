@@ -37,6 +37,11 @@ jobs:
       - name: Install server dependencies
         run: pip install -r requirements.txt
 
+      - name: Set default provider config
+        id: defaults
+        shell: bash
+        run: echo "config=$(echo '{"provider":"anthropic"}')" >> $GITHUB_OUTPUT
+
       - name: Run evaluations
         uses: plugin-federation/plugin-federation-actions/actions/anthropic-mcp-eval@main
         with:
@@ -44,4 +49,4 @@ jobs:
           transport: ${{ inputs.transport || 'stdio' }}
           mcp-command: ${{ inputs.mcp-command || 'python' }}
           mcp-args: ${{ inputs.mcp-args || 'src/server.py' }}
-          provider-config: ${{ inputs.provider-config || "{\"provider\": \"anthropic\"}" }}
+          provider-config: ${{ inputs.provider-config || steps.defaults.outputs.config }}
