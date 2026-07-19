@@ -6,10 +6,16 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
-      provider-config:
-        description: "Provider config (JSON)"
+      provider-model:
+        description: "LiteLLM model string (e.g. openai/grok-build-0.1)"
         required: false
-        default: '{"provider": "xai", "model": "grok-build-0.1"}'
+        default: "openai/grok-build-0.1"
+      provider-api-key:
+        description: "API key for the target provider"
+        required: false
+      provider-api-base:
+        description: "Custom API base URL (for xai or OpenAI-compatible endpoints)"
+        required: false
       transport:
         description: "MCP transport"
         required: false
@@ -37,11 +43,6 @@ jobs:
       - name: Install server dependencies
         run: pip install -r requirements.txt
 
-      - name: Set default provider config
-        id: defaults
-        shell: bash
-        run: echo "config=$(echo '{"provider":"xai","model":"grok-build-0.1"}')" >> $GITHUB_OUTPUT
-
       - name: Run evaluations
         uses: plugin-federation/plugin-federation-actions/actions/anthropic-mcp-eval@main
         with:
@@ -49,6 +50,8 @@ jobs:
           transport: ${{ inputs.transport || 'stdio' }}
           mcp-command: ${{ inputs.mcp-command || 'python' }}
           mcp-args: ${{ inputs.mcp-args || 'src/server.py' }}
-          provider-config: ${{ inputs.provider-config || steps.defaults.outputs.config }}
+          provider-model: ${{ inputs.provider-model || 'openai/grok-build-0.1' }}
+          provider-api-key: ${{ inputs.provider-api-key || secrets.XAI_API_KEY }}
+          provider-api-base: ${{ inputs.provider-api-base || 'https://api.x.ai/v1' }}
         env:
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
