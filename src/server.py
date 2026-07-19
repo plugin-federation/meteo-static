@@ -32,9 +32,9 @@ CITIES: dict[str, dict[str, Any]] = {
         "condition": "Partly cloudy",
         "precip_mm": 0.0,
     },
-    "lorem_ipsum": {
-        "name": "Lorem Ipsum",
-        "country": "Dolor Sit",
+    "new_york": {
+        "name": "New York",
+        "country": "US",
         "lat": 40.71,
         "lon": -74.01,
         "temp_c": 22.5,
@@ -44,9 +44,9 @@ CITIES: dict[str, dict[str, Any]] = {
         "condition": "Sunny",
         "precip_mm": 0.0,
     },
-    "ameta_dolor": {
-        "name": "Ameta Dolor",
-        "country": "Consectetur",
+    "london": {
+        "name": "London",
+        "country": "GB",
         "lat": 51.51,
         "lon": -0.13,
         "temp_c": 12.0,
@@ -56,9 +56,9 @@ CITIES: dict[str, dict[str, Any]] = {
         "condition": "Rainy",
         "precip_mm": 5.2,
     },
-    "sitamet": {
-        "name": "SitaMet",
-        "country": "Adipiscing",
+    "san_francisco": {
+        "name": "San Francisco",
+        "country": "US",
         "lat": 37.77,
         "lon": -122.42,
         "temp_c": 18.0,
@@ -77,17 +77,17 @@ FORECASTS: dict[str, list[dict[str, Any]]] = {
         {"day": "Tuesday", "high_c": 11.0, "low_c": 5.0, "condition": "Partly cloudy"},
         {"day": "Wednesday", "high_c": 9.0, "low_c": 3.0, "condition": "Rainy"},
     ],
-    "lorem_ipsum": [
+    "new_york": [
         {"day": "Monday", "high_c": 24.0, "low_c": 18.0, "condition": "Sunny"},
         {"day": "Tuesday", "high_c": 25.0, "low_c": 19.0, "condition": "Sunny"},
         {"day": "Wednesday", "high_c": 23.0, "low_c": 17.0, "condition": "Partly cloudy"},
     ],
-    "ameta_dolor": [
+    "london": [
         {"day": "Monday", "high_c": 13.0, "low_c": 8.0, "condition": "Rainy"},
         {"day": "Tuesday", "high_c": 14.0, "low_c": 9.0, "condition": "Cloudy"},
         {"day": "Wednesday", "high_c": 15.0, "low_c": 10.0, "condition": "Partly cloudy"},
     ],
-    "sitamet": [
+    "san_francisco": [
         {"day": "Monday", "high_c": 19.0, "low_c": 12.0, "condition": "Foggy"},
         {"day": "Tuesday", "high_c": 20.0, "low_c": 13.0, "condition": "Sunny"},
         {"day": "Wednesday", "high_c": 21.0, "low_c": 14.0, "condition": "Sunny"},

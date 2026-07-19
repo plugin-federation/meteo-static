@@ -9,11 +9,11 @@
     <answer>8.5</answer>
   </qa_pair>
   <qa_pair>
-    <question>The city 'Lorem Ipsum' reports a specific weather condition. What is that condition?</question>
+    <question>The city 'New York' reports a specific weather condition. What is that condition?</question>
     <answer>Sunny</answer>
   </qa_pair>
   <qa_pair>
-    <question>How many days of forecast data are available for the city 'Ameta Dolor'?</question>
+    <question>How many days of forecast data are available for the city 'London'?</question>
     <answer>3</answer>
   </qa_pair>
   <qa_pair>
@@ -21,11 +21,11 @@
     <answer>Unknown city: nonexistent_city</answer>
   </qa_pair>
   <qa_pair>
-    <question>Which city in the supported list has the name 'SitaMet'?</question>
-    <answer>SitaMet</answer>
+    <question>Which city in the supported list has the name 'San Francisco'?</question>
+    <answer>San Francisco</answer>
   </qa_pair>
   <qa_pair>
-    <question>What is the humidity percentage for the city 'SitaMet'?</question>
+    <question>What is the humidity percentage for the city 'San Francisco'?</question>
     <answer>68</answer>
   </qa_pair>
   <qa_pair>
