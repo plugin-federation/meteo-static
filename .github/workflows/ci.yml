@@ -9,7 +9,7 @@ on:
       provider-config:
         description: "Provider config (JSON)"
         required: false
-        default: '{"provider": "anthropic"}'
+        default: '{"provider": "xai", "model": "grok-build-0.1"}'
       transport:
         description: "MCP transport"
         required: false
@@ -40,7 +40,7 @@ jobs:
       - name: Set default provider config
         id: defaults
         shell: bash
-        run: echo "config=$(echo '{"provider":"anthropic"}')" >> $GITHUB_OUTPUT
+        run: echo "config=$(echo '{"provider":"xai","model":"grok-build-0.1"}')" >> $GITHUB_OUTPUT
 
       - name: Run evaluations
         uses: plugin-federation/plugin-federation-actions/actions/anthropic-mcp-eval@main
@@ -50,3 +50,5 @@ jobs:
           mcp-command: ${{ inputs.mcp-command || 'python' }}
           mcp-args: ${{ inputs.mcp-args || 'src/server.py' }}
           provider-config: ${{ inputs.provider-config || steps.defaults.outputs.config }}
+        env:
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
