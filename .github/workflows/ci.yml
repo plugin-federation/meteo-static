@@ -41,7 +41,7 @@ jobs:
         uses: plugin-federation/plugin-federation-actions/actions/anthropic-mcp-eval@main
         with:
           evals-dir: ./evals
-          transport: ${{ github.event_name == 'workflow_dispatch' && inputs.transport || 'stdio' }}
-          mcp-command: ${{ github.event_name == 'workflow_dispatch' && inputs.mcp-command || 'python' }}
-          mcp-args: ${{ github.event_name == 'workflow_dispatch' && inputs.mcp-args || 'src/server.py' }}
-          provider-config: ${{ github.event_name == 'workflow_dispatch' && inputs.provider-config || '{"provider": "anthropic"}' }}
+          transport: ${{ inputs.transport || 'stdio' }}
+          mcp-command: ${{ inputs.mcp-command || 'python' }}
+          mcp-args: ${{ inputs.mcp-args || 'src/server.py' }}
+          provider-config: ${{ inputs.provider-config || '{"provider": "anthropic"}' }}
