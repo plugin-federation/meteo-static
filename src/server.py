@@ -102,7 +102,10 @@ mcp = FastMCP("meteo-static")
 
 @mcp.tool()
 def list_cities() -> list[str]:
-    """List all supported cities for weather queries."""
+    """List all supported cities for weather queries.
+
+    Returns display names that can be used directly with get_weather and get_forecast.
+    """
     return [info["name"] for info in CITIES.values()]
 
 
@@ -111,9 +114,16 @@ def get_weather(city: str) -> dict[str, Any]:
     """Get current weather for a city.
 
     Args:
-        city: City key (e.g. 'tokyo', 'lorem_ipsum', 'ameta_dolor', 'sitamet').
+        city: City key or display name (e.g. 'tokyo', 'Tokyo', 'New York').
     """
+    # Try direct key match first (case-insensitive)
     info = CITIES.get(city.lower())
+    if info is None:
+        # Fallback: match by display name (case-insensitive)
+        for key, val in CITIES.items():
+            if val["name"].lower() == city.lower():
+                info = val
+                break
     if info is None:
         return {"error": f"Unknown city: {city}"}
     return {
@@ -133,9 +143,16 @@ def get_forecast(city: str) -> list[dict[str, Any]]:
     """Get a 3-day forecast for a city.
 
     Args:
-        city: City key (e.g. 'tokyo', 'lorem_ipsum', 'ameta_dolor', 'sitamet').
+        city: City key or display name (e.g. 'tokyo', 'Tokyo', 'New York').
     """
+    # Try direct key match first (case-insensitive)
     data = FORECASTS.get(city.lower())
+    if data is None:
+        # Fallback: match by display name (case-insensitive)
+        for key, val in CITIES.items():
+            if val["name"].lower() == city.lower():
+                data = FORECASTS.get(key)
+                break
     if data is None:
         return [{"error": f"Unknown city: {city}"}]
     return data
