@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       provider-model:
-        description: "LiteLLM model string (e.g. openai/grok-build-0.1)"
+        description: "LiteLLM model string (e.g. xai/grok-build-0.1)"
         required: false
-        default: "openai/grok-build-0.1"
+        default: "xai/grok-build-0.1"
       provider-api-key:
         description: "API key for the target provider"
         required: false
@@ -50,8 +50,9 @@ jobs:
           transport: ${{ inputs.transport || 'stdio' }}
           mcp-command: ${{ inputs.mcp-command || 'python' }}
           mcp-args: ${{ inputs.mcp-args || 'src/server.py' }}
-          provider-model: ${{ inputs.provider-model || 'openai/grok-build-0.1' }}
-          provider-api-key: ${{ inputs.provider-api-key || secrets.XAI_API_KEY }}
-          provider-api-base: ${{ inputs.provider-api-base || 'https://api.x.ai/v1' }}
+          provider-model: ${{ inputs.provider-model || 'xai/grok-build-0.1' }}
+          provider-api-key: ${{ inputs.provider-api-key }}
+          provider-api-base: ${{ inputs.provider-api-base }}
         env:
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          XAI_API_BASE: "https://api.x.ai/v1"
