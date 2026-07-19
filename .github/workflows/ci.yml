@@ -44,4 +44,4 @@ jobs:
           transport: ${{ inputs.transport || 'stdio' }}
           mcp-command: ${{ inputs.mcp-command || 'python' }}
           mcp-args: ${{ inputs.mcp-args || 'src/server.py' }}
-          provider-config: ${{ inputs.provider-config || '{"provider": "anthropic"}' }}
+          provider-config: ${{ inputs.provider-config || "{\"provider\": \"anthropic\"}" }}
