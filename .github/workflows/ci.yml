@@ -7,10 +7,23 @@ on:
 
 jobs:
   ci:
-    uses: plugin-federation/plugin-federation-actions/.github/workflows/mcp-server-ci.yml@v0
-    with:
-      python-version: "3.12"
-      requirements: "requirements.txt"
-      server-command: "python src/server.py"
-      min-tools: "3"
-      expected-tools: "list_cities,get_weather,get_forecast"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install server dependencies
+        run: pip install -r requirements.txt
+
+      - name: Functional tests
+        uses: plugin-federation/plugin-federation-actions/actions/functional-tests@main
+        env:
+          CONNECTION_TYPE: stdio
+          MCP_COMMAND: python
+          MCP_ARGS: src/server.py
+        with:
+          component: meteo-static

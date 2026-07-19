@@ -1,0 +1,44 @@
+{
+  "evals": [
+    {
+      "id": "list_cities_count",
+      "prompt": "list_cities - should return all supported cities",
+      "expected_output": "4"
+    },
+    {
+      "id": "get_weather_tokyo_temp",
+      "prompt": "get_weather with city=tokyo - should report temp_c of 8.5",
+      "expected_output": "8.5"
+    },
+    {
+      "id": "get_weather_lorem_ipsum_condition",
+      "prompt": "get_weather with city=lorem_ipsum - should report condition Sunny",
+      "expected_output": "Sunny"
+    },
+    {
+      "id": "get_forecast_ameta_dolor_days",
+      "prompt": "get_forecast with city=ameta_dolor - should return 3 days of forecast",
+      "expected_output": "3"
+    },
+    {
+      "id": "get_weather_unknown_city_error",
+      "prompt": "get_weather with city=nonexistent_city - should return an error",
+      "expected_output": "error"
+    },
+    {
+      "id": "list_cities_sitamet_present",
+      "prompt": "list_cities - should include SitaMet in the returned city names",
+      "expected_output": "SitaMet"
+    },
+    {
+      "id": "get_weather_sitamet_humidity",
+      "prompt": "get_weather with city=sitamet - should report humidity_pct of 68",
+      "expected_output": "68"
+    },
+    {
+      "id": "get_forecast_tokyo_wednesday_high",
+      "prompt": "get_forecast with city=tokyo - should report Wednesday high_c of 9.0",
+      "expected_output": "9.0"
+    }
+  ]
+}
