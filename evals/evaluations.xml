@@ -1,43 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<evaluations>
+<evaluation>
   <qa_pair>
-    <id>list_cities_count</id>
-    <question>list_cities - should return all supported cities</question>
-    <expected_output>4</expected_output>
+    <question>How many cities are supported by this weather server?</question>
+    <answer>4</answer>
   </qa_pair>
   <qa_pair>
-    <id>get_weather_tokyo_temp</id>
-    <question>get_weather with city=tokyo - should report temp_c of 8.5</question>
-    <expected_output>8.5</expected_output>
+    <question>What is the current temperature in Celsius for Tokyo?</question>
+    <answer>8.5</answer>
   </qa_pair>
   <qa_pair>
-    <id>get_weather_lorem_ipsum_condition</id>
-    <question>get_weather with city=lorem_ipsum - should report condition Sunny</question>
-    <expected_output>Sunny</expected_output>
+    <question>The city 'Lorem Ipsum' reports a specific weather condition. What is that condition?</question>
+    <answer>Sunny</answer>
   </qa_pair>
   <qa_pair>
-    <id>get_forecast_ameta_dolor_days</id>
-    <question>get_forecast with city=ameta_dolor - should return 3 days of forecast</question>
-    <expected_output>3</expected_output>
+    <question>How many days of forecast data are available for the city 'Ameta Dolor'?</question>
+    <answer>3</answer>
   </qa_pair>
   <qa_pair>
-    <id>get_weather_unknown_city_error</id>
-    <question>get_weather with city=nonexistent_city - should return an error</question>
-    <expected_output>error</expected_output>
+    <question>What error message does the server return when querying weather for a city named 'nonexistent_city'?</question>
+    <answer>Unknown city: nonexistent_city</answer>
   </qa_pair>
   <qa_pair>
-    <id>list_cities_sitamet_present</id>
-    <question>list_cities - should include SitaMet in the returned city names</question>
-    <expected_output>SitaMet</expected_output>
+    <question>Which city in the supported list has the name 'SitaMet'?</question>
+    <answer>SitaMet</answer>
   </qa_pair>
   <qa_pair>
-    <id>get_weather_sitamet_humidity</id>
-    <question>get_weather with city=sitamet - should report humidity_pct of 68</question>
-    <expected_output>68</expected_output>
+    <question>What is the humidity percentage for the city 'SitaMet'?</question>
+    <answer>68</answer>
   </qa_pair>
   <qa_pair>
-    <id>get_forecast_tokyo_wednesday_high</id>
-    <question>get_forecast with city=tokyo - should report Wednesday high_c of 9.0</question>
-    <expected_output>9.0</expected_output>
+    <question>What is the high temperature in Celsius on Wednesday in the Tokyo forecast?</question>
+    <answer>9.0</answer>
   </qa_pair>
-</evaluations>
+</evaluation>
