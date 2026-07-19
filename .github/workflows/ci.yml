@@ -4,6 +4,24 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      provider-config:
+        description: "Provider config (JSON)"
+        required: false
+        default: '{"provider": "anthropic"}'
+      transport:
+        description: "MCP transport"
+        required: false
+        default: "stdio"
+      mcp-command:
+        description: "MCP server command"
+        required: false
+        default: "python"
+      mcp-args:
+        description: "MCP server arguments"
+        required: false
+        default: "src/server.py"
 
 jobs:
   ci:
@@ -23,8 +41,7 @@ jobs:
         uses: plugin-federation/plugin-federation-actions/actions/anthropic-mcp-eval@main
         with:
           evals-dir: ./evals
-          transport: stdio
-          mcp-command: python
-          mcp-args: src/server.py
-          provider-config: >
-            {"provider": "anthropic"}
+          transport: ${{ github.event_name == 'workflow_dispatch' && inputs.transport || 'stdio' }}
+          mcp-command: ${{ github.event_name == 'workflow_dispatch' && inputs.mcp-command || 'python' }}
+          mcp-args: ${{ github.event_name == 'workflow_dispatch' && inputs.mcp-args || 'src/server.py' }}
+          provider-config: ${{ github.event_name == 'workflow_dispatch' && inputs.provider-config || '{"provider": "anthropic"}' }}
