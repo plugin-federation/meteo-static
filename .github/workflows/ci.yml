@@ -19,11 +19,12 @@ jobs:
       - name: Install server dependencies
         run: pip install -r requirements.txt
 
-      - name: Functional tests
-        uses: plugin-federation/plugin-federation-actions/actions/functional-tests@main
-        env:
-          CONNECTION_TYPE: stdio
-          MCP_COMMAND: python
-          MCP_ARGS: src/server.py
+      - name: Run evaluations
+        uses: plugin-federation/plugin-federation-actions/actions/anthropic-mcp-eval@main
         with:
-          component: meteo-static
+          evals-dir: ./evals
+          transport: stdio
+          mcp-command: python
+          mcp-args: src/server.py
+          provider-config: >
+            {"provider": "anthropic"}

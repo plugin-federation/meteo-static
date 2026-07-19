@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<evaluations>
+  <qa_pair>
+    <id>list_cities_count</id>
+    <question>list_cities - should return all supported cities</question>
+    <expected_output>4</expected_output>
+  </qa_pair>
+  <qa_pair>
+    <id>get_weather_tokyo_temp</id>
+    <question>get_weather with city=tokyo - should report temp_c of 8.5</question>
+    <expected_output>8.5</expected_output>
+  </qa_pair>
+  <qa_pair>
+    <id>get_weather_lorem_ipsum_condition</id>
+    <question>get_weather with city=lorem_ipsum - should report condition Sunny</question>
+    <expected_output>Sunny</expected_output>
+  </qa_pair>
+  <qa_pair>
+    <id>get_forecast_ameta_dolor_days</id>
+    <question>get_forecast with city=ameta_dolor - should return 3 days of forecast</question>
+    <expected_output>3</expected_output>
+  </qa_pair>
+  <qa_pair>
+    <id>get_weather_unknown_city_error</id>
+    <question>get_weather with city=nonexistent_city - should return an error</question>
+    <expected_output>error</expected_output>
+  </qa_pair>
+  <qa_pair>
+    <id>list_cities_sitamet_present</id>
+    <question>list_cities - should include SitaMet in the returned city names</question>
+    <expected_output>SitaMet</expected_output>
+  </qa_pair>
+  <qa_pair>
+    <id>get_weather_sitamet_humidity</id>
+    <question>get_weather with city=sitamet - should report humidity_pct of 68</question>
+    <expected_output>68</expected_output>
+  </qa_pair>
+  <qa_pair>
+    <id>get_forecast_tokyo_wednesday_high</id>
+    <question>get_forecast with city=tokyo - should report Wednesday high_c of 9.0</question>
+    <expected_output>9.0</expected_output>
+  </qa_pair>
+</evaluations>
