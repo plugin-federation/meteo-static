@@ -43,7 +43,6 @@ jobs:
           name: tools-list
           path: ci/tools-list.json
 
-      # Hermetic Action: no npm install on the consumer job.
       # Pin a release tag (e.g. @v1) once published; @main is fine for dogfood.
       - name: Validate tools/list (Plugin Federation)
         uses: plugin-federation/actions/mcp-tools-list-validate@main
