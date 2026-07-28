@@ -37,20 +37,16 @@ python scripts/export_tools_list.py --output ci/tools-list.json
 
 ## Validate tools/list with Plugin Federation Action
 
-Uses the hermetic Action
-[`plugin-federation/actions/mcp-tools-list-validate`](https://github.com/plugin-federation/actions/tree/main/mcp-tools-list-validate)
-(no consumer `npm install`).
-
-```bash
-# After exporting ci/tools-list.json, in a workflow:
-# uses: plugin-federation/actions/mcp-tools-list-validate@main
-# with:
-#   tools-list-file: ci/tools-list.json
-#   profile: plugin-federation
+```yaml
+- uses: plugin-federation/actions/mcp-tools-list-validate@main
+  with:
+    tools-list-file: ci/tools-list.json
+    profile: plugin-federation
 ```
 
 CI job `tools-list-validate` exports the live catalog from this server and runs
-that Action on every push/PR.
+that Action on every push/PR. See
+[mcp-tools-list-validate](https://github.com/plugin-federation/actions/tree/main/mcp-tools-list-validate).
 
 ## GitHub Actions
 
