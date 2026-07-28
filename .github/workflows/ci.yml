@@ -20,7 +20,49 @@ on:
         default: "src/server.py"
 
 jobs:
-  ci:
+  # Deterministic tools/list checks — no LLM keys required.
+  tools-list-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install server dependencies
+        run: pip install -r requirements.txt
+
+      - name: Export tools/list from local MCP server
+        run: python scripts/export_tools_list.py --output ci/tools-list.json
+
+      - name: Upload tools-list artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tools-list
+          path: ci/tools-list.json
+
+      # Hermetic Action: no npm install on the consumer job.
+      # Pin a release tag (e.g. @v1) once published; @main is fine for dogfood.
+      - name: Validate tools/list (Plugin Federation)
+        uses: plugin-federation/actions/mcp-tools-list-validate@main
+        with:
+          tools-list-file: ci/tools-list.json
+          profile: plugin-federation
+          report-file: mcp-tools-list-report.json
+          github-annotations: "true"
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-tools-list-report
+          path: mcp-tools-list-report.json
+          if-no-files-found: ignore
+
+  # LLM-backed functional evals (requires XAI_API_KEY).
+  evals:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
