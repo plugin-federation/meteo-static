@@ -1,0 +1,85 @@
+{
+  "tools": [
+    {
+      "name": "list_cities",
+      "description": "List all supported cities for weather queries.\n\nReturns display names that can be used directly with get_weather and get_forecast.\n",
+      "inputSchema": {
+        "properties": {},
+        "title": "list_citiesArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Result",
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "list_citiesOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_weather",
+      "description": "Get current weather for a city.\n\nArgs:\n    city: City key or display name (e.g. 'tokyo', 'Tokyo', 'New York').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "title": "City",
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "title": "get_weatherArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "get_weatherDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_forecast",
+      "description": "Get a 3-day forecast for a city.\n\nArgs:\n    city: City key or display name (e.g. 'tokyo', 'Tokyo', 'New York').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "title": "City",
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "title": "get_forecastArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Result",
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "get_forecastOutput",
+        "type": "object"
+      }
+    }
+  ]
+}
