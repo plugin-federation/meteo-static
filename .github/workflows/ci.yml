@@ -97,6 +97,21 @@ jobs:
           tools-list-file: ci/tools-list.json
           source-version: ${{ github.sha }}
 
+      # Judges (prompts) from Nexus; model keys from CI secrets.
+      - name: LLM-as-judge (pending tools only)
+        uses: plugin-federation/actions/mcp-tool-judge-pipeline@main
+        with:
+          nexus-url: ${{ vars.NEXUS_URL }}
+          tenant-id: ${{ vars.TENANT_ID }}
+          source-id: ${{ vars.MCP_SOURCE_ID }}
+          access-token: ${{ steps.auth.outputs.access-token }}
+          tools-list-file: ci/tools-list.json
+          catalog-digest: ${{ steps.catalog.outputs.catalog-digest }}
+        env:
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
   # LLM-backed functional evals (requires XAI_API_KEY).
   evals:
     runs-on: ubuntu-latest
