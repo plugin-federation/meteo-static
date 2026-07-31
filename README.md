@@ -73,5 +73,10 @@ records the exported `tools/list` catalog for this MCP source.
 | `TENANT_ID` | Target tenant UUID |
 | `MCP_SOURCE_ID` | Stable tool source UUID for this server |
 
-Workflow job: `nexus-catalog` (requires `permissions: id-token: write`).
-Trust policy is registered in Nexus (immutable `repository_id`).
+Workflow job: `nexus-catalog` uses shared Actions:
+
+- `plugin-federation/actions/nexus-oidc-exchange`
+- `plugin-federation/actions/nexus-record-tool-catalog`
+
+Requires `permissions: id-token: write`. Trust policy is registered in Nexus
+(immutable `repository_id`).
