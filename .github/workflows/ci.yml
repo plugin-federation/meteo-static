@@ -20,7 +20,7 @@ on:
         default: "src/server.py"
 
 jobs:
-  # Deterministic tools/list checks — no LLM keys required.
+  # Deterministic tools/list checks - no LLM keys required.
   tools-list-validate:
     runs-on: ubuntu-latest
     steps:
@@ -59,6 +59,110 @@ jobs:
           name: mcp-tools-list-report
           path: mcp-tools-list-report.json
           if-no-files-found: ignore
+
+  # Exchange GitHub Actions OIDC for a short-lived Nexus JWT, then record the
+  # tools/list catalog for this MCP source (first dogfood of pipeline OIDC).
+  nexus-catalog:
+    name: Nexus catalog (OIDC)
+    needs: tools-list-validate
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      NEXUS_URL: ${{ vars.NEXUS_URL }}
+      NEXUS_OIDC_AUDIENCE: ${{ vars.NEXUS_OIDC_AUDIENCE }}
+      TENANT_ID: ${{ vars.TENANT_ID }}
+      MCP_SOURCE_ID: ${{ vars.MCP_SOURCE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download tools-list artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tools-list
+          path: ci
+
+      - name: Exchange OIDC for Nexus access token
+        id: oidc
+        run: |
+          set -euo pipefail
+          : "${NEXUS_URL:?set vars.NEXUS_URL}"
+          : "${NEXUS_OIDC_AUDIENCE:?set vars.NEXUS_OIDC_AUDIENCE}"
+          : "${TENANT_ID:?set vars.TENANT_ID}"
+          : "${MCP_SOURCE_ID:?set vars.MCP_SOURCE_ID}"
+          : "${ACTIONS_ID_TOKEN_REQUEST_URL:?}"
+          : "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:?}"
+
+          ID_TOKEN="$(curl -fsSL \
+            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${NEXUS_OIDC_AUDIENCE}" \
+            | jq -r .value)"
+          if [[ -z "$ID_TOKEN" || "$ID_TOKEN" == "null" ]]; then
+            echo "Failed to obtain GitHub Actions OIDC id token"
+            exit 1
+          fi
+
+          jq -n \
+            --arg provider github_actions \
+            --arg tenantId "$TENANT_ID" \
+            --arg idToken "$ID_TOKEN" \
+            '{provider:$provider,tenantId:$tenantId,idToken:$idToken}' \
+            > "$RUNNER_TEMP/oidc-exchange.json"
+
+          curl -fsS -X POST "${NEXUS_URL}/api/v1/auth/oidc/exchanges" \
+            -H "content-type: application/json" \
+            --data-binary @"$RUNNER_TEMP/oidc-exchange.json" \
+            > "$RUNNER_TEMP/oidc-exchange-response.json"
+
+          jq -e '.accessToken' "$RUNNER_TEMP/oidc-exchange-response.json" >/dev/null
+          jq -r '.accessToken' "$RUNNER_TEMP/oidc-exchange-response.json" > "$RUNNER_TEMP/nexus.token"
+          echo "Nexus principal: $(jq -r '.principal' "$RUNNER_TEMP/oidc-exchange-response.json")"
+          echo "Matched policy: $(jq -r '.matchedPolicyId' "$RUNNER_TEMP/oidc-exchange-response.json")"
+          echo "Roles: $(jq -r '.roles | join(",")' "$RUNNER_TEMP/oidc-exchange-response.json")"
+
+      - name: Record tool catalog in Nexus
+        run: |
+          set -euo pipefail
+          TOKEN="$(cat "$RUNNER_TEMP/nexus.token")"
+          SOURCE_VERSION="${GITHUB_SHA}"
+
+          # Map MCP tools/list → Nexus tool-catalog (strip non-contract fields).
+          jq \
+            --arg sourceId "$MCP_SOURCE_ID" \
+            --arg sourceVersion "$SOURCE_VERSION" \
+            '{
+              sourceId: $sourceId,
+              sourceVersion: $sourceVersion,
+              tools: [
+                .tools[]
+                | {
+                    name,
+                    description: (.description // ""),
+                    inputSchema
+                  }
+                  + (if .annotations then {annotations: .annotations} else {} end)
+              ]
+            }' \
+            ci/tools-list.json > "$RUNNER_TEMP/catalog.json"
+
+          IDEMPOTENCY_KEY="catalog-${GITHUB_SHA}"
+          HTTP_CODE="$(curl -sS -o "$RUNNER_TEMP/catalog-response.json" -w "%{http_code}" \
+            -X POST "${NEXUS_URL}/api/v1/tenants/${TENANT_ID}/tool-sources/${MCP_SOURCE_ID}/catalogs" \
+            -H "authorization: Bearer ${TOKEN}" \
+            -H "content-type: application/json" \
+            -H "idempotency-key: ${IDEMPOTENCY_KEY}" \
+            -H "x-request-id: gha-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --data-binary @"$RUNNER_TEMP/catalog.json")"
+
+          echo "Catalog POST status: ${HTTP_CODE}"
+          cat "$RUNNER_TEMP/catalog-response.json"
+          echo
+          if [[ "$HTTP_CODE" != "201" && "$HTTP_CODE" != "200" ]]; then
+            exit 1
+          fi
+          echo "catalogDigest=$(jq -r '.catalogDigest // .digest // empty' "$RUNNER_TEMP/catalog-response.json")" >> "$GITHUB_OUTPUT"
+          echo "Recorded catalog for source ${MCP_SOURCE_ID} version ${SOURCE_VERSION}"
 
   # LLM-backed functional evals (requires XAI_API_KEY).
   evals:

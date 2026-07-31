@@ -60,3 +60,18 @@ that Action on every push/PR. See
 - **Working** — both transports functional
 - **Tools** — 3 tools with JSON schemas
 - **CI** — tools/list validate via `plugin-federation/actions`; evals via `plugin-federation-actions`
+
+## Nexus pipeline (nonprod dogfood)
+
+GitHub Actions exchanges an OIDC ID token for a short-lived Nexus JWT and
+records the exported `tools/list` catalog for this MCP source.
+
+| Variable | Purpose |
+|----------|---------|
+| `NEXUS_URL` | `https://api.nonprod.plugin-federation.com` |
+| `NEXUS_OIDC_AUDIENCE` | Must match Nexus `NEXUS_OIDC_GITHUB_AUDIENCE` |
+| `TENANT_ID` | Target tenant UUID |
+| `MCP_SOURCE_ID` | Stable tool source UUID for this server |
+
+Workflow job: `nexus-catalog` (requires `permissions: id-token: write`).
+Trust policy is registered in Nexus (immutable `repository_id`).
