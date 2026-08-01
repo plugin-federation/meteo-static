@@ -60,10 +60,9 @@ jobs:
           path: mcp-tools-list-report.json
           if-no-files-found: ignore
 
-  # Exchange GitHub Actions OIDC for a short-lived Nexus JWT, then record the
-  # tools/list catalog (shared Actions from plugin-federation/actions).
+  # OIDC → record tools/list catalog + run LLM-as-judge (scores/assessments).
   nexus-catalog:
-    name: Nexus catalog (OIDC)
+    name: Nexus catalog + judges
     needs: tools-list-validate
     runs-on: ubuntu-latest
     permissions:
@@ -86,19 +85,9 @@ jobs:
           tenant-id: ${{ vars.TENANT_ID }}
           oidc-audience: ${{ vars.NEXUS_OIDC_AUDIENCE }}
 
-      - name: Record tool catalog in Nexus
-        id: catalog
-        uses: plugin-federation/actions/nexus-record-tool-catalog@main
-        with:
-          nexus-url: ${{ vars.NEXUS_URL }}
-          tenant-id: ${{ vars.TENANT_ID }}
-          source-id: ${{ vars.MCP_SOURCE_ID }}
-          access-token: ${{ steps.auth.outputs.access-token }}
-          tools-list-file: ci/tools-list.json
-          source-version: ${{ github.sha }}
-
-      # Judges (prompts) from Nexus; model keys from CI secrets.
-      - name: LLM-as-judge (pending tools only)
+      # Single step: catalog snapshot + judge assessments (prompts from Nexus).
+      - name: Record catalog and run judges
+        id: pipeline
         uses: plugin-federation/actions/mcp-tool-judge-pipeline@main
         with:
           nexus-url: ${{ vars.NEXUS_URL }}
@@ -106,7 +95,7 @@ jobs:
           source-id: ${{ vars.MCP_SOURCE_ID }}
           access-token: ${{ steps.auth.outputs.access-token }}
           tools-list-file: ci/tools-list.json
-          catalog-digest: ${{ steps.catalog.outputs.catalog-digest }}
+          source-version: ${{ github.sha }}
         env:
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
