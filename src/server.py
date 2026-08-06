@@ -17,6 +17,130 @@ import argparse
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
+from pydantic import BaseModel
+
+# -- Output schema models -------------------------------------------------
+
+
+class WeatherResult(BaseModel):
+    city: str
+    country: str
+    temp_c: float
+    feels_like_c: float
+    humidity_pct: int
+    wind_kph: float
+    condition: str
+    precip_mm: float
+
+
+class ForecastDay(BaseModel):
+    day: str
+    high_c: float
+    low_c: float
+    condition: str
+
+
+class AirQualityResult(BaseModel):
+    city: str
+    aqi: int
+    category: str
+    pm2_5_ugm3: float
+    pm10_ugm3: float
+    o3_ppb: int
+
+
+class UvIndexResult(BaseModel):
+    city: str
+    uv_index: int
+    exposure_category: str
+
+
+class WindDetailResult(BaseModel):
+    city: str
+    speed_kph: float
+    direction_deg: int
+    direction_label: str
+    gust_kph: float
+
+
+class HumidityResult(BaseModel):
+    city: str
+    humidity_pct: int
+    dew_point_c: float
+    comfort: str
+
+
+class PrecipHour(BaseModel):
+    hour: str
+    prob_pct: int
+
+
+class PrecipitationChanceResult(BaseModel):
+    city: str
+    hourly: list[PrecipHour]
+
+
+class SunriseSunsetResult(BaseModel):
+    city: str
+    sunrise_utc: str
+    sunset_utc: str
+
+
+class VisibilityResult(BaseModel):
+    city: str
+    visibility_km: float
+    description: str
+
+
+class PressureResult(BaseModel):
+    city: str
+    pressure_hpa: float
+    trend: str
+
+
+class MoonPhaseResult(BaseModel):
+    city: str
+    phase: str
+    illumination_pct: int
+    age_days: int
+
+
+class PollenForecastResult(BaseModel):
+    city: str
+    level: str
+    score: int
+    dominant_type: str
+    risk: str
+
+
+class FeelsLikeDetailResult(BaseModel):
+    city: str
+    temp_c: float
+    feels_like_c: float
+    difference_c: float
+    dominant_factor: str
+
+
+class HourlyTempEntry(BaseModel):
+    hour: str
+    temp_c: float
+
+
+class HourlyTemperatureResult(BaseModel):
+    city: str
+    hourly: list[HourlyTempEntry]
+
+
+class WeatherAlert(BaseModel):
+    type: str
+    severity: str
+    message: str
+
+
+class WeatherAlertResult(BaseModel):
+    city: str
+    alerts: list[WeatherAlert]
+    count: int
 
 # Fixed weather data for demo/validation purposes
 CITIES: dict[str, dict[str, Any]] = {
@@ -212,7 +336,7 @@ def list_cities() -> list[str]:
 
 
 @mcp.tool()
-def get_weather(city: str) -> dict[str, Any]:
+def get_weather(city: str) -> WeatherResult:
     """Get current weather for a city.
 
     Args:
@@ -227,21 +351,21 @@ def get_weather(city: str) -> dict[str, Any]:
                 info = val
                 break
     if info is None:
-        return {"error": f"Unknown city: {city}"}
-    return {
-        "city": info["name"],
-        "country": info["country"],
-        "temp_c": info["temp_c"],
-        "feels_like_c": info["feels_like_c"],
-        "humidity_pct": info["humidity_pct"],
-        "wind_kph": info["wind_kph"],
-        "condition": info["condition"],
-        "precip_mm": info["precip_mm"],
-    }
+        raise ValueError(f"Unknown city: {city}")
+    return WeatherResult(
+        city=info["name"],
+        country=info["country"],
+        temp_c=info["temp_c"],
+        feels_like_c=info["feels_like_c"],
+        humidity_pct=info["humidity_pct"],
+        wind_kph=info["wind_kph"],
+        condition=info["condition"],
+        precip_mm=info["precip_mm"],
+    )
 
 
 @mcp.tool()
-def get_forecast(city: str) -> list[dict[str, Any]]:
+def get_forecast(city: str) -> list[ForecastDay]:
     """Get a 3-day forecast for a city.
 
     Args:
@@ -256,12 +380,12 @@ def get_forecast(city: str) -> list[dict[str, Any]]:
                 data = FORECASTS.get(key)
                 break
     if data is None:
-        return [{"error": f"Unknown city: {city}"}]
-    return data
+        raise ValueError(f"Unknown city: {city}")
+    return [ForecastDay(**d) for d in data]
 
 
 @mcp.tool()
-def get_air_quality(city: str) -> dict[str, Any]:
+def get_air_quality(city: str) -> AirQualityResult:
     """Get current air quality index (AQI) for a city.
 
     Args:
@@ -346,12 +470,12 @@ def get_air_quality(city: str) -> dict[str, Any]:
             break
     data = _AQI.get(key)
     if data is None:
-        return {"error": f"No air quality data for: {city}"}
-    return {"city": CITIES[key]["name"], **data}
+        raise ValueError(f"No air quality data for: {city}")
+    return AirQualityResult(city=CITIES[key]["name"], **data)
 
 
 @mcp.tool()
-def get_uv_index(city: str) -> dict[str, Any]:
+def get_uv_index(city: str) -> UvIndexResult:
     """Get the current UV index for a city.
 
     Args:
@@ -376,12 +500,12 @@ def get_uv_index(city: str) -> dict[str, Any]:
             break
     data = _UV.get(key)
     if data is None:
-        return {"error": f"No UV data for: {city}"}
-    return {"city": CITIES[key]["name"], **data}
+        raise ValueError(f"No UV data for: {city}")
+    return UvIndexResult(city=CITIES[key]["name"], **data)
 
 
 @mcp.tool()
-def get_wind_detail(city: str) -> dict[str, Any]:
+def get_wind_detail(city: str) -> WindDetailResult:
     """Get detailed wind information for a city, including direction and gusts.
 
     Args:
@@ -456,12 +580,12 @@ def get_wind_detail(city: str) -> dict[str, Any]:
             break
     data = _WIND.get(key)
     if data is None:
-        return {"error": f"No wind data for: {city}"}
-    return {"city": CITIES[key]["name"], **data}
+        raise ValueError(f"No wind data for: {city}")
+    return WindDetailResult(city=CITIES[key]["name"], **data)
 
 
 @mcp.tool()
-def get_humidity(city: str) -> dict[str, Any]:
+def get_humidity(city: str) -> HumidityResult:
     """Get current humidity and dew point for a city.
 
     Args:
@@ -486,12 +610,12 @@ def get_humidity(city: str) -> dict[str, Any]:
             break
     data = _HUMIDITY.get(key)
     if data is None:
-        return {"error": f"No humidity data for: {city}"}
-    return {"city": CITIES[key]["name"], **data}
+        raise ValueError(f"No humidity data for: {city}")
+    return HumidityResult(city=CITIES[key]["name"], **data)
 
 
 @mcp.tool()
-def get_precipitation_chance(city: str) -> dict[str, Any]:
+def get_precipitation_chance(city: str) -> PrecipitationChanceResult:
     """Get the hourly precipitation probability for the next 6 hours for a city.
 
     Args:
@@ -586,12 +710,15 @@ def get_precipitation_chance(city: str) -> dict[str, Any]:
             break
     data = _PRECIP.get(key)
     if data is None:
-        return {"error": f"No precipitation data for: {city}"}
-    return {"city": CITIES[key]["name"], "hourly": data}
+        raise ValueError(f"No precipitation data for: {city}")
+    return PrecipitationChanceResult(
+        city=CITIES[key]["name"],
+        hourly=[PrecipHour(**h) for h in data],
+    )
 
 
 @mcp.tool()
-def get_sunrise_sunset(city: str) -> dict[str, Any]:
+def get_sunrise_sunset(city: str) -> SunriseSunsetResult:
     """Get today's sunrise and sunset times (UTC) for a city.
 
     Args:
@@ -616,12 +743,12 @@ def get_sunrise_sunset(city: str) -> dict[str, Any]:
             break
     data = _SUNTIMES.get(key)
     if data is None:
-        return {"error": f"No sun time data for: {city}"}
-    return {"city": CITIES[key]["name"], **data}
+        raise ValueError(f"No sun time data for: {city}")
+    return SunriseSunsetResult(city=CITIES[key]["name"], **data)
 
 
 @mcp.tool()
-def get_visibility(city: str) -> dict[str, Any]:
+def get_visibility(city: str) -> VisibilityResult:
     """Get current atmospheric visibility for a city.
 
     Args:
@@ -646,12 +773,12 @@ def get_visibility(city: str) -> dict[str, Any]:
             break
     data = _VIS.get(key)
     if data is None:
-        return {"error": f"No visibility data for: {city}"}
-    return {"city": CITIES[key]["name"], **data}
+        raise ValueError(f"No visibility data for: {city}")
+    return VisibilityResult(city=CITIES[key]["name"], **data)
 
 
 @mcp.tool()
-def get_pressure(city: str) -> dict[str, Any]:
+def get_pressure(city: str) -> PressureResult:
     """Get current atmospheric pressure for a city.
 
     Args:
@@ -676,12 +803,12 @@ def get_pressure(city: str) -> dict[str, Any]:
             break
     data = _PRESSURE.get(key)
     if data is None:
-        return {"error": f"No pressure data for: {city}"}
-    return {"city": CITIES[key]["name"], **data}
+        raise ValueError(f"No pressure data for: {city}")
+    return PressureResult(city=CITIES[key]["name"], **data)
 
 
 @mcp.tool()
-def get_moon_phase(city: str) -> dict[str, Any]:
+def get_moon_phase(city: str) -> MoonPhaseResult:
     """Get the current lunar (moon) phase for a city's location.
 
     Args:
@@ -706,12 +833,12 @@ def get_moon_phase(city: str) -> dict[str, Any]:
             break
     data = _MOON.get(key)
     if data is None:
-        return {"error": f"No moon phase data for: {city}"}
-    return {"city": CITIES[key]["name"], **data}
+        raise ValueError(f"No moon phase data for: {city}")
+    return MoonPhaseResult(city=CITIES[key]["name"], **data)
 
 
 @mcp.tool()
-def get_pollen_forecast(city: str) -> dict[str, Any]:
+def get_pollen_forecast(city: str) -> PollenForecastResult:
     """Get current pollen levels and dominant pollen type for a city.
 
     Args:
@@ -746,12 +873,12 @@ def get_pollen_forecast(city: str) -> dict[str, Any]:
             break
     data = _POLLEN.get(key)
     if data is None:
-        return {"error": f"No pollen data for: {city}"}
-    return {"city": CITIES[key]["name"], **data}
+        raise ValueError(f"No pollen data for: {city}")
+    return PollenForecastResult(city=CITIES[key]["name"], **data)
 
 
 @mcp.tool()
-def get_feels_like_detail(city: str) -> dict[str, Any]:
+def get_feels_like_detail(city: str) -> FeelsLikeDetailResult:
     """Get detailed apparent temperature breakdown (wind chill, heat index) for a city.
 
     Args:
@@ -764,22 +891,22 @@ def get_feels_like_detail(city: str) -> dict[str, Any]:
             break
     info = CITIES.get(key)
     if info is None:
-        return {"error": f"Unknown city: {city}"}
+        raise ValueError(f"Unknown city: {city}")
     temp = info["temp_c"]
     feels = info["feels_like_c"]
     diff = round(feels - temp, 1)
     factor = "Wind chill" if diff < 0 else ("Heat index" if diff > 0 else "Neutral")
-    return {
-        "city": info["name"],
-        "temp_c": temp,
-        "feels_like_c": feels,
-        "difference_c": diff,
-        "dominant_factor": factor,
-    }
+    return FeelsLikeDetailResult(
+        city=info["name"],
+        temp_c=temp,
+        feels_like_c=feels,
+        difference_c=diff,
+        dominant_factor=factor,
+    )
 
 
 @mcp.tool()
-def get_hourly_temperature(city: str) -> dict[str, Any]:
+def get_hourly_temperature(city: str) -> HourlyTemperatureResult:
     """Get hourly temperature for the next 6 hours for a city.
 
     Args:
@@ -874,12 +1001,15 @@ def get_hourly_temperature(city: str) -> dict[str, Any]:
             break
     data = _HOURLY.get(key)
     if data is None:
-        return {"error": f"No hourly data for: {city}"}
-    return {"city": CITIES[key]["name"], "hourly": data}
+        raise ValueError(f"No hourly data for: {city}")
+    return HourlyTemperatureResult(
+        city=CITIES[key]["name"],
+        hourly=[HourlyTempEntry(**h) for h in data],
+    )
 
 
 @mcp.tool()
-def get_weather_alert(city: str) -> dict[str, Any]:
+def get_weather_alert(city: str) -> WeatherAlertResult:
     """Get any active meteorological alerts or warnings for a city.
 
     Args:
@@ -944,8 +1074,12 @@ def get_weather_alert(city: str) -> dict[str, Any]:
             break
     alerts = _ALERTS.get(key)
     if alerts is None:
-        return {"error": f"Unknown city: {city}"}
-    return {"city": CITIES[key]["name"], "alerts": alerts, "count": len(alerts)}
+        raise ValueError(f"Unknown city: {city}")
+    return WeatherAlertResult(
+        city=CITIES[key]["name"],
+        alerts=[WeatherAlert(**a) for a in alerts],
+        count=len(alerts),
+    )
 
 
 # -- Entry point ----------------------------------------------------------
