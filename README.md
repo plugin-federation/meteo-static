@@ -13,7 +13,7 @@ schema validation, transport support).
 | `get_forecast` | Get a 3-day forecast for a city |
 
 ## Running
-
+ 
 ### STDIO (default)
 
 ```bash
