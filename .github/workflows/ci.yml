@@ -96,12 +96,9 @@ jobs:
           access-token: ${{ steps.auth.outputs.access-token }}
           tools-list-file: ci/tools-list.json
           source-version: ${{ github.sha }}
-          # Optional tool embeddings for Console similarity (name+description only).
-          # xAI has no public embedding model yet — leave unset, or set repo vars when
-          # using another provider (e.g. EMBEDDING_MODEL=text-embedding-3-small,
-          # EMBEDDING_PROVIDER=openai + OPENAI_API_KEY).
-          embedding-model: ${{ vars.EMBEDDING_MODEL }}
-          embedding-provider: ${{ vars.EMBEDDING_PROVIDER }}
+          # Tool embeddings for Console similarity (name+description only; memoized).
+          embedding-model: text-embedding-3-small
+          embedding-provider: openai
         env:
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
