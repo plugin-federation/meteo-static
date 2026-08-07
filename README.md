@@ -1,8 +1,8 @@
 # meteo-static
 
 Mock meteorological MCP server that serves fixed weather data for locations.
-Used to validate GitHub Actions that check MCP server tooling (tool listing,
-schema validation, transport support).
+Used to dogfood Plugin Federation shared Actions (tool listing, schema
+validation, Nexus catalog + judges, embeddings, functional evals).
 
 ## Tools
 
@@ -50,33 +50,46 @@ that Action on every push/PR. See
 
 ## GitHub Actions
 
+All shared Actions come from **`plugin-federation/actions`** (not the retired
+`plugin-federation-actions` repo).
+
 | Job | Purpose |
 |-----|---------|
 | `tools-list-validate` | Export `tools/list` + SEP-986 / PF structural validation |
-| `evals` | Anthropic-format functional evals (needs `XAI_API_KEY`) |
+| `nexus-catalog` | OIDC → catalog record + tool embeddings + LLM-as-judge |
+| `evals` | Anthropic-format functional evals (`evals/evaluations.xml`) |
 
 ## Status
 
 - **Working** — both transports functional
-- **Tools** — 3 tools with JSON schemas
-- **CI** — tools/list validate via `plugin-federation/actions`; evals via `plugin-federation-actions`
+- **Tools** — mock weather tools with JSON schemas
+- **CI** — entirely on `plugin-federation/actions`
 
 ## Nexus pipeline (nonprod dogfood)
 
-GitHub Actions exchanges an OIDC ID token for a short-lived Nexus JWT and
-records the exported `tools/list` catalog for this MCP source.
+GitHub Actions exchanges an OIDC ID token for a short-lived Nexus JWT, records
+the exported `tools/list` catalog, optionally embeds tools (name + description),
+and runs tenant judges.
 
-| Variable | Purpose |
-|----------|---------|
+| Variable / secret | Purpose |
+|-------------------|---------|
 | `NEXUS_URL` | `https://api.nonprod.plugin-federation.com` |
 | `NEXUS_OIDC_AUDIENCE` | Must match Nexus `NEXUS_OIDC_GITHUB_AUDIENCE` |
 | `TENANT_ID` | Target tenant UUID |
 | `MCP_SOURCE_ID` | Stable tool source UUID for this server |
+| `EMBEDDING_MODEL` | Optional; default `text-embedding-3-small` |
+| `EMBEDDING_PROVIDER` | Optional; default `openai` |
+| `XAI_API_KEY` | Judge / functional eval model |
+| `OPENAI_API_KEY` | Embeddings (when using the OpenAI provider) |
 
-Workflow job: `nexus-catalog` uses shared Actions:
+Workflow job `nexus-catalog` uses:
 
 - `plugin-federation/actions/nexus-oidc-exchange`
-- `plugin-federation/actions/nexus-record-tool-catalog`
+- `plugin-federation/actions/mcp-tool-judge-pipeline` (catalog + embed + judges)
+
+Functional evals use:
+
+- `plugin-federation/actions/anthropic-mcp-eval`
 
 Requires `permissions: id-token: write`. Trust policy is registered in Nexus
 (immutable `repository_id`).

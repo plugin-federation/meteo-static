@@ -85,8 +85,8 @@ jobs:
           tenant-id: ${{ vars.TENANT_ID }}
           oidc-audience: ${{ vars.NEXUS_OIDC_AUDIENCE }}
 
-      # Single step: catalog snapshot + judge assessments (prompts from Nexus).
-      - name: Record catalog and run judges
+      # Catalog + optional embeddings + judge assessments (prompts from Nexus).
+      - name: Record catalog, embed tools, run judges
         id: pipeline
         uses: plugin-federation/actions/mcp-tool-judge-pipeline@main
         with:
@@ -96,12 +96,16 @@ jobs:
           access-token: ${{ steps.auth.outputs.access-token }}
           tools-list-file: ci/tools-list.json
           source-version: ${{ github.sha }}
+          # Name+description embeddings for Console similarity (memoized).
+          # Override via repo vars if set; defaults match openai text-embedding-3-small.
+          embedding-model: ${{ vars.EMBEDDING_MODEL != '' && vars.EMBEDDING_MODEL || 'text-embedding-3-small' }}
+          embedding-provider: ${{ vars.EMBEDDING_PROVIDER != '' && vars.EMBEDDING_PROVIDER || 'openai' }}
         env:
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-  # LLM-backed functional evals (requires XAI_API_KEY).
+  # LLM-backed functional evals (Anthropic evaluations.xml format).
   evals:
     runs-on: ubuntu-latest
     steps:
@@ -116,7 +120,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run evaluations
-        uses: plugin-federation/plugin-federation-actions/actions/anthropic-mcp-eval@main
+        uses: plugin-federation/actions/anthropic-mcp-eval@main
         with:
           evals-dir: ./evals
           transport: ${{ inputs.transport || 'stdio' }}
