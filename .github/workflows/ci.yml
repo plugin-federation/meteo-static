@@ -96,10 +96,12 @@ jobs:
           access-token: ${{ steps.auth.outputs.access-token }}
           tools-list-file: ci/tools-list.json
           source-version: ${{ github.sha }}
-          # Name+description embeddings for Console similarity (memoized).
-          # Default: xAI grok-embedding-small via XAI_API_KEY (same key as judges/evals).
-          embedding-model: ${{ vars.EMBEDDING_MODEL != '' && vars.EMBEDDING_MODEL || 'grok-embedding-small' }}
-          embedding-provider: ${{ vars.EMBEDDING_PROVIDER != '' && vars.EMBEDDING_PROVIDER || 'xai' }}
+          # Optional tool embeddings for Console similarity (name+description only).
+          # xAI has no public embedding model yet — leave unset, or set repo vars when
+          # using another provider (e.g. EMBEDDING_MODEL=text-embedding-3-small,
+          # EMBEDDING_PROVIDER=openai + OPENAI_API_KEY).
+          embedding-model: ${{ vars.EMBEDDING_MODEL }}
+          embedding-provider: ${{ vars.EMBEDDING_PROVIDER }}
         env:
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
