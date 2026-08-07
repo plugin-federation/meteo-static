@@ -77,10 +77,9 @@ and runs tenant judges.
 | `NEXUS_OIDC_AUDIENCE` | Must match Nexus `NEXUS_OIDC_GITHUB_AUDIENCE` |
 | `TENANT_ID` | Target tenant UUID |
 | `MCP_SOURCE_ID` | Stable tool source UUID for this server |
-| `EMBEDDING_MODEL` | Optional; default `text-embedding-3-small` |
-| `EMBEDDING_PROVIDER` | Optional; default `openai` |
-| `XAI_API_KEY` | Judge / functional eval model |
-| `OPENAI_API_KEY` | Embeddings (when using the OpenAI provider) |
+| `EMBEDDING_MODEL` | Optional; default `grok-embedding-small` |
+| `EMBEDDING_PROVIDER` | Optional; default `xai` |
+| `XAI_API_KEY` | Judge model, functional evals, and embeddings |
 
 Workflow job `nexus-catalog` uses:
 

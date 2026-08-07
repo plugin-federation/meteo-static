@@ -97,9 +97,9 @@ jobs:
           tools-list-file: ci/tools-list.json
           source-version: ${{ github.sha }}
           # Name+description embeddings for Console similarity (memoized).
-          # Override via repo vars if set; defaults match openai text-embedding-3-small.
-          embedding-model: ${{ vars.EMBEDDING_MODEL != '' && vars.EMBEDDING_MODEL || 'text-embedding-3-small' }}
-          embedding-provider: ${{ vars.EMBEDDING_PROVIDER != '' && vars.EMBEDDING_PROVIDER || 'openai' }}
+          # Default: xAI grok-embedding-small via XAI_API_KEY (same key as judges/evals).
+          embedding-model: ${{ vars.EMBEDDING_MODEL != '' && vars.EMBEDDING_MODEL || 'grok-embedding-small' }}
+          embedding-provider: ${{ vars.EMBEDDING_PROVIDER != '' && vars.EMBEDDING_PROVIDER || 'xai' }}
         env:
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
