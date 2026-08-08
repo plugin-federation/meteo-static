@@ -19,6 +19,7 @@ on:
         required: false
         default: "src/server.py"
 
+
 jobs:
   # Deterministic tools/list checks - no LLM keys required.
   tools-list-validate:
