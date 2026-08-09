@@ -8,10 +8,18 @@
         "type": "object"
       },
       "outputSchema": {
-        "items": {
-          "type": "string"
+        "properties": {
+          "result": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
         },
-        "type": "array"
+        "required": [
+          "result"
+        ],
+        "type": "object"
       }
     },
     {
@@ -84,10 +92,44 @@
         "type": "object"
       },
       "outputSchema": {
-        "items": {
-          "$ref": "#/$defs/ForecastDay"
+        "$defs": {
+          "ForecastDay": {
+            "properties": {
+              "day": {
+                "type": "string"
+              },
+              "high_c": {
+                "type": "number"
+              },
+              "low_c": {
+                "type": "number"
+              },
+              "condition": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "day",
+              "high_c",
+              "low_c",
+              "condition"
+            ],
+            "title": "ForecastDay",
+            "type": "object"
+          }
         },
-        "type": "array"
+        "properties": {
+          "result": {
+            "items": {
+              "$ref": "#/$defs/ForecastDay"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object"
       }
     },
     {
@@ -273,11 +315,9 @@
           "PrecipHour": {
             "properties": {
               "hour": {
-                "title": "Hour",
                 "type": "string"
               },
               "prob_pct": {
-                "title": "Prob Pct",
                 "type": "integer"
               }
             },
@@ -557,11 +597,9 @@
           "HourlyTempEntry": {
             "properties": {
               "hour": {
-                "title": "Hour",
                 "type": "string"
               },
               "temp_c": {
-                "title": "Temp C",
                 "type": "number"
               }
             },
@@ -611,15 +649,12 @@
           "WeatherAlert": {
             "properties": {
               "type": {
-                "title": "Type",
                 "type": "string"
               },
               "severity": {
-                "title": "Severity",
                 "type": "string"
               },
               "message": {
-                "title": "Message",
                 "type": "string"
               }
             },

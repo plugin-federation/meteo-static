@@ -30,35 +30,16 @@ def _is_generated_title(title: object, tool_name: str) -> bool:
     )
 
 
-def _is_result_envelope(schema: dict) -> bool:
-    if schema.get("type") != "object":
-        return False
-    props = schema.get("properties")
-    if not isinstance(props, dict) or list(props.keys()) != ["result"]:
-        return False
-    required = schema.get("required")
-    if required is not None and required != ["result"]:
-        return False
-    title = schema.get("title")
-    if isinstance(title, str) and not title.endswith(
-        ("Output", "DictOutput", "Arguments")
-    ):
-        return False
-    return True
-
-
 def normalize_json_schema(schema: object, tool_name: str) -> object:
-    """Strip FastMCP/Pydantic wrapper titles and single-property result envelopes."""
+    """Strip FastMCP/Pydantic synthetic titles; keep MCP-valid object shapes.
+
+    Do **not** unwrap FastMCP ``{ result: T }`` output envelopes: MCP / PFMTL
+    require ``outputSchema.type == "object"`` when outputSchema is present.
+    Unwrapping arrays also drops ``$defs`` needed by ``$ref``.
+    """
     if not isinstance(schema, dict):
         return schema
-    current: dict = json.loads(json.dumps(schema))  # deep copy via JSON
-    for _ in range(3):
-        if not _is_result_envelope(current):
-            break
-        inner = current.get("properties", {}).get("result")
-        if not isinstance(inner, dict):
-            break
-        current = json.loads(json.dumps(inner))
+    current: dict = json.loads(json.dumps(schema))
     if _is_generated_title(current.get("title"), tool_name):
         current.pop("title", None)
     if current.get("title") == "Result":
@@ -74,6 +55,17 @@ def normalize_json_schema(schema: object, tool_name: str) -> object:
             )
             if prop.get("title") in {auto, snake, "Result"}:
                 prop.pop("title", None)
+            if isinstance(prop.get("properties"), dict) or prop.get("type") == "object":
+                props[key] = normalize_json_schema(prop, tool_name)
+            elif isinstance(prop.get("items"), dict):
+                prop["items"] = normalize_json_schema(prop["items"], tool_name)
+    if isinstance(current.get("items"), dict):
+        current["items"] = normalize_json_schema(current["items"], tool_name)
+    for defs_key in ("$defs", "definitions"):
+        defs = current.get(defs_key)
+        if isinstance(defs, dict):
+            for def_name, def_schema in list(defs.items()):
+                defs[def_name] = normalize_json_schema(def_schema, tool_name)
     return current
 
 
@@ -85,9 +77,24 @@ def normalize_tool_payload(payload: dict) -> dict:
     if "input_schema" in out:
         out["inputSchema"] = normalize_json_schema(out.pop("input_schema"), name)
     if "outputSchema" in out:
-        out["outputSchema"] = normalize_json_schema(out["outputSchema"], name)
+        cleaned = normalize_json_schema(out["outputSchema"], name)
+        # Re-wrap accidental bare non-object roots (MCP requires type object).
+        if isinstance(cleaned, dict) and cleaned.get("type") not in (None, "object"):
+            cleaned = {
+                "type": "object",
+                "properties": {"result": cleaned},
+                "required": ["result"],
+            }
+        out["outputSchema"] = cleaned
     if "output_schema" in out:
-        out["outputSchema"] = normalize_json_schema(out.pop("output_schema"), name)
+        cleaned = normalize_json_schema(out.pop("output_schema"), name)
+        if isinstance(cleaned, dict) and cleaned.get("type") not in (None, "object"):
+            cleaned = {
+                "type": "object",
+                "properties": {"result": cleaned},
+                "required": ["result"],
+            }
+        out["outputSchema"] = cleaned
     return out
 
 
