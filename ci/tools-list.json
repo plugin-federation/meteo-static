@@ -5,24 +5,13 @@
       "description": "List all supported cities for weather queries.\n\nReturns display names that can be used directly with get_weather and get_forecast.\n",
       "inputSchema": {
         "properties": {},
-        "title": "list_citiesArguments",
         "type": "object"
       },
       "outputSchema": {
-        "properties": {
-          "result": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Result",
-            "type": "array"
-          }
+        "items": {
+          "type": "string"
         },
-        "required": [
-          "result"
-        ],
-        "title": "list_citiesOutput",
-        "type": "object"
+        "type": "array"
       }
     },
     {
@@ -31,19 +20,52 @@
       "inputSchema": {
         "properties": {
           "city": {
-            "title": "City",
             "type": "string"
           }
         },
         "required": [
           "city"
         ],
-        "title": "get_weatherArguments",
         "type": "object"
       },
       "outputSchema": {
-        "additionalProperties": true,
-        "title": "get_weatherDictOutput",
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "temp_c": {
+            "type": "number"
+          },
+          "feels_like_c": {
+            "type": "number"
+          },
+          "humidity_pct": {
+            "type": "integer"
+          },
+          "wind_kph": {
+            "type": "number"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "precip_mm": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "city",
+          "country",
+          "temp_c",
+          "feels_like_c",
+          "humidity_pct",
+          "wind_kph",
+          "condition",
+          "precip_mm"
+        ],
+        "title": "WeatherResult",
         "type": "object"
       }
     },
@@ -53,31 +75,583 @@
       "inputSchema": {
         "properties": {
           "city": {
-            "title": "City",
             "type": "string"
           }
         },
         "required": [
           "city"
         ],
-        "title": "get_forecastArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "items": {
+          "$ref": "#/$defs/ForecastDay"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "name": "get_air_quality",
+      "description": "Get current air quality index (AQI) for a city.\n\nArgs:\n    city: City key or display name (e.g. 'tokyo', 'London').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
         "type": "object"
       },
       "outputSchema": {
         "properties": {
-          "result": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
+          "city": {
+            "type": "string"
+          },
+          "aqi": {
+            "type": "integer"
+          },
+          "category": {
+            "type": "string"
+          },
+          "pm2_5_ugm3": {
+            "type": "number"
+          },
+          "pm10_ugm3": {
+            "type": "number"
+          },
+          "o3_ppb": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "city",
+          "aqi",
+          "category",
+          "pm2_5_ugm3",
+          "pm10_ugm3",
+          "o3_ppb"
+        ],
+        "title": "AirQualityResult",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_uv_index",
+      "description": "Get the current UV index for a city.\n\nArgs:\n    city: City key or display name (e.g. 'sydney', 'Dubai').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "uv_index": {
+            "type": "integer"
+          },
+          "exposure_category": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "uv_index",
+          "exposure_category"
+        ],
+        "title": "UvIndexResult",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_wind_detail",
+      "description": "Get detailed wind information for a city, including direction and gusts.\n\nArgs:\n    city: City key or display name (e.g. 'london', 'Cape Town').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "speed_kph": {
+            "type": "number"
+          },
+          "direction_deg": {
+            "type": "integer"
+          },
+          "direction_label": {
+            "type": "string"
+          },
+          "gust_kph": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "city",
+          "speed_kph",
+          "direction_deg",
+          "direction_label",
+          "gust_kph"
+        ],
+        "title": "WindDetailResult",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_humidity",
+      "description": "Get current humidity and dew point for a city.\n\nArgs:\n    city: City key or display name (e.g. 'tokyo', 'S\u00e3o Paulo').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "humidity_pct": {
+            "type": "integer"
+          },
+          "dew_point_c": {
+            "type": "number"
+          },
+          "comfort": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "humidity_pct",
+          "dew_point_c",
+          "comfort"
+        ],
+        "title": "HumidityResult",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_precipitation_chance",
+      "description": "Get the hourly precipitation probability for the next 6 hours for a city.\n\nArgs:\n    city: City key or display name (e.g. 'london', 'Moscow').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "PrecipHour": {
+            "properties": {
+              "hour": {
+                "title": "Hour",
+                "type": "string"
+              },
+              "prob_pct": {
+                "title": "Prob Pct",
+                "type": "integer"
+              }
             },
-            "title": "Result",
+            "required": [
+              "hour",
+              "prob_pct"
+            ],
+            "title": "PrecipHour",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "hourly": {
+            "items": {
+              "$ref": "#/$defs/PrecipHour"
+            },
             "type": "array"
           }
         },
         "required": [
-          "result"
+          "city",
+          "hourly"
         ],
-        "title": "get_forecastOutput",
+        "title": "PrecipitationChanceResult",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_sunrise_sunset",
+      "description": "Get today's sunrise and sunset times (UTC) for a city.\n\nArgs:\n    city: City key or display name (e.g. 'tokyo', 'Sydney').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "sunrise_utc": {
+            "type": "string"
+          },
+          "sunset_utc": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "sunrise_utc",
+          "sunset_utc"
+        ],
+        "title": "SunriseSunsetResult",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_visibility",
+      "description": "Get current atmospheric visibility for a city.\n\nArgs:\n    city: City key or display name (e.g. 'san_francisco', 'Dubai').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "visibility_km": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "visibility_km",
+          "description"
+        ],
+        "title": "VisibilityResult",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_pressure",
+      "description": "Get current atmospheric pressure for a city.\n\nArgs:\n    city: City key or display name (e.g. 'london', 'Moscow').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "pressure_hpa": {
+            "type": "number"
+          },
+          "trend": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "pressure_hpa",
+          "trend"
+        ],
+        "title": "PressureResult",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_moon_phase",
+      "description": "Get the current lunar (moon) phase for a city's location.\n\nArgs:\n    city: City key or display name (e.g. 'tokyo', 'London').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "phase": {
+            "type": "string"
+          },
+          "illumination_pct": {
+            "type": "integer"
+          },
+          "age_days": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "city",
+          "phase",
+          "illumination_pct",
+          "age_days"
+        ],
+        "title": "MoonPhaseResult",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_pollen_forecast",
+      "description": "Get current pollen levels and dominant pollen type for a city.\n\nArgs:\n    city: City key or display name (e.g. 'paris', 'Sydney').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer"
+          },
+          "dominant_type": {
+            "type": "string"
+          },
+          "risk": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "level",
+          "score",
+          "dominant_type",
+          "risk"
+        ],
+        "title": "PollenForecastResult",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_feels_like_detail",
+      "description": "Get detailed apparent temperature breakdown (wind chill, heat index) for a city.\n\nArgs:\n    city: City key or display name (e.g. 'moscow', 'Dubai').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "temp_c": {
+            "type": "number"
+          },
+          "feels_like_c": {
+            "type": "number"
+          },
+          "difference_c": {
+            "type": "number"
+          },
+          "dominant_factor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "temp_c",
+          "feels_like_c",
+          "difference_c",
+          "dominant_factor"
+        ],
+        "title": "FeelsLikeDetailResult",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_hourly_temperature",
+      "description": "Get hourly temperature for the next 6 hours for a city.\n\nArgs:\n    city: City key or display name (e.g. 'new_york', 'Sydney').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "HourlyTempEntry": {
+            "properties": {
+              "hour": {
+                "title": "Hour",
+                "type": "string"
+              },
+              "temp_c": {
+                "title": "Temp C",
+                "type": "number"
+              }
+            },
+            "required": [
+              "hour",
+              "temp_c"
+            ],
+            "title": "HourlyTempEntry",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "hourly": {
+            "items": {
+              "$ref": "#/$defs/HourlyTempEntry"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "city",
+          "hourly"
+        ],
+        "title": "HourlyTemperatureResult",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_weather_alert",
+      "description": "Get any active meteorological alerts or warnings for a city.\n\nArgs:\n    city: City key or display name (e.g. 'london', 'S\u00e3o Paulo').\n",
+      "inputSchema": {
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "WeatherAlert": {
+            "properties": {
+              "type": {
+                "title": "Type",
+                "type": "string"
+              },
+              "severity": {
+                "title": "Severity",
+                "type": "string"
+              },
+              "message": {
+                "title": "Message",
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "severity",
+              "message"
+            ],
+            "title": "WeatherAlert",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "alerts": {
+            "items": {
+              "$ref": "#/$defs/WeatherAlert"
+            },
+            "type": "array"
+          },
+          "count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "city",
+          "alerts",
+          "count"
+        ],
+        "title": "WeatherAlertResult",
         "type": "object"
       }
     }

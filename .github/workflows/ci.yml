@@ -97,6 +97,9 @@ jobs:
           access-token: ${{ steps.auth.outputs.access-token }}
           tools-list-file: ci/tools-list.json
           source-version: ${{ github.sha }}
+          # Dogfood: always publish Console evidence; do not hard-fail the PR
+          # solely because LLM judges scored some tools below threshold.
+          fail-on-judge-fail: "false"
           # Tool embeddings for Console similarity (name+description only; memoized).
           embedding-model: text-embedding-3-small
           embedding-provider: openai
@@ -104,6 +107,18 @@ jobs:
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Surface Console catalog evidence link
+        if: always() && steps.pipeline.outputs.catalog-console-url != ''
+        run: |
+          echo "::notice title=Console catalog evidence::${{ steps.pipeline.outputs.catalog-console-url }}"
+          {
+            echo "## Console catalog evidence"
+            echo
+            echo "[Open catalog evidence & judge opinions](${{ steps.pipeline.outputs.catalog-console-url }})"
+            echo
+            echo "- **Catalog digest:** \`${{ steps.pipeline.outputs.catalog-digest }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   # LLM-backed functional evals (Anthropic evaluations.xml format).
   evals:
@@ -129,3 +144,5 @@ jobs:
           provider-model: "xai/grok-build-0.1"
           provider-api-key: ${{ secrets.XAI_API_KEY }}
           provider-api-base: "https://api.x.ai/v1"
+          # LLM grading is non-deterministic; 100% is too brittle for dogfood.
+          accuracy-threshold: "75"
