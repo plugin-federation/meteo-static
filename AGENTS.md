@@ -36,7 +36,9 @@ CI workflows under `.github/workflows/` use **only**
 [`plugin-federation/actions`](https://github.com/plugin-federation/actions):
 
 - `mcp-tools-list-validate` — structural tools/list checks
-- `nexus-oidc-exchange` + `mcp-tool-judge-pipeline` — catalog, embeddings, judges
+- `nexus-oidc-exchange` + `mcp-tool-judge-pipeline` — catalog, schema verify,
+  selection-surface embeddings (`text-embedding-3-small`), judges. Nexus owns
+  similarity reports; embed errors do not fail judges.
 - `anthropic-mcp-eval` — `evals/evaluations.xml` functional harness
 
 Do **not** reference the retired `plugin-federation/plugin-federation-actions`

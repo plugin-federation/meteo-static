@@ -56,7 +56,7 @@ All shared Actions come from **`plugin-federation/actions`** (not the retired
 | Job | Purpose |
 |-----|---------|
 | `tools-list-validate` | Export `tools/list` + SEP-986 / PF structural validation |
-| `nexus-catalog` | OIDC → catalog record + tool embeddings + LLM-as-judge |
+| `nexus-catalog` | OIDC → catalog, schema verify, selection-surface embeddings, LLM-as-judge |
 | `evals` | Anthropic-format functional evals (`evals/evaluations.xml`) |
 
 ## Status
@@ -68,8 +68,16 @@ All shared Actions come from **`plugin-federation/actions`** (not the retired
 ## Nexus pipeline (nonprod dogfood)
 
 GitHub Actions exchanges an OIDC ID token for a short-lived Nexus JWT, records
-the exported `tools/list` catalog, optionally embeds tools (name + description),
-and runs tenant judges.
+the exported `tools/list` catalog, schema-verifies it against plugin draft pins,
+embeds the model-visible selection surface (name + description + input schema),
+and runs tenant judges. Embed failures do not fail the judge step. Similarity
+reports are derived by Nexus from a registered semantic-analysis profile, not
+in this repository.
+
+A tenant admin must register a `semantic-analysis-profile/v1` whose
+`profileVersion` and `model` match `embedding-model` (`text-embedding-3-small`)
+and whose `dimensions` match the provider output (1536 for that model unless
+shortened). CI uses `plugin_author` and cannot create that profile.
 
 | Variable / secret | Purpose |
 |-------------------|---------|
@@ -83,7 +91,7 @@ and runs tenant judges.
 Workflow job `nexus-catalog` uses:
 
 - `plugin-federation/actions/nexus-oidc-exchange`
-- `plugin-federation/actions/mcp-tool-judge-pipeline` (catalog + embed + judges)
+- `plugin-federation/actions/mcp-tool-judge-pipeline` (catalog + schema verify + embed + judges)
 
 Functional evals use:
 
