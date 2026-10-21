@@ -2,7 +2,9 @@
 
 ## Purpose
 
-Mock meteorological MCP server that serves fixed weather data for locations. Used to validate GitHub Actions that check MCP server tooling (tool listing, schema validation, transport support).
+Mock meteorological MCP server that serves fixed weather data for locations.
+Used to dogfood Plugin Federation shared GitHub Actions (tool listing, schema
+validation, Nexus catalog + judges, embeddings, functional evals).
 
 ## Tools
 
@@ -30,11 +32,17 @@ python src/server.py --transport http --port 8000
 
 ## GitHub Actions
 
-CI workflows under `.github/workflows/` validate:
+CI workflows under `.github/workflows/` use **only**
+[`plugin-federation/actions`](https://github.com/plugin-federation/actions):
 
-- Python linting (ruff)
-- Type checking (mypy)
-- Tool listing via the MCP protocol
+- `mcp-tools-list-validate` — structural tools/list checks
+- `nexus-oidc-exchange` + `mcp-tool-judge-pipeline` — catalog, schema verify,
+  selection-surface embeddings (`text-embedding-3-small`), judges. Nexus owns
+  similarity reports; embed errors do not fail judges.
+- `anthropic-mcp-eval` — `evals/evaluations.xml` functional harness
+
+Do **not** reference the retired `plugin-federation/plugin-federation-actions`
+repository.
 
 ## Key files
 
@@ -43,19 +51,21 @@ CI workflows under `.github/workflows/` validate:
 | `src/server.py` | MCP server entry point |
 | `pyproject.toml` | Python project config |
 | `requirements.txt` | Dependencies |
-| `.github/workflows/` | CI lint + type-check + tool validation |
+| `evals/evaluations.xml` | Functional eval qa_pairs |
+| `ci/tools-list.json` | Exported tools/list (artifact in CI) |
+| `.github/workflows/ci.yml` | CI jobs |
 
 ## Status
 
 - **Working** — both transports functional
-- **Tools** — 3 tools with complete JSON schemas
-- **CI** — lint, type-check, tool validation via plugin-federation-actions
+- **Tools** — mock weather tools with JSON schemas
+- **CI** — shared Actions from `plugin-federation/actions`
 
 ## Depends on
 
-- **plugin-federation-actions** — CI workflows for MCP server validation
+- **plugin-federation/actions** — shared CI Actions
 
 ## Related
 
-- [./meteo-dynamic/AGENTS.md](./meteo-dynamic/AGENTS.md) — companion computation server
-- [./plugin-federation-actions/AGENTS.md](./plugin-federation-actions/AGENTS.md) — shared CI actions
+- [meteo-dynamic](https://github.com/plugin-federation/meteo-dynamic) — companion computation server
+- [plugin-federation/actions](https://github.com/plugin-federation/actions) — shared CI Actions

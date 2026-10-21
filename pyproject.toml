@@ -3,7 +3,7 @@ name = "meteo-static"
 version = "0.1.0"
 description = "Mock meteorological MCP server with fixed weather data"
 requires-python = ">=3.11"
-dependencies = ["mcp>=1.0.0"]
+dependencies = ["mcp>=1.0.0,<2"]
 
 [tool.ruff]
 line-length = 100

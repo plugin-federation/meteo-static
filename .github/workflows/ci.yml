@@ -20,7 +20,7 @@ on:
         default: "src/server.py"
 
 jobs:
-  # Deterministic tools/list checks — no LLM keys required.
+  # Deterministic tools/list checks - no LLM keys required.
   tools-list-validate:
     runs-on: ubuntu-latest
     steps:
@@ -60,7 +60,73 @@ jobs:
           path: mcp-tools-list-report.json
           if-no-files-found: ignore
 
-  # LLM-backed functional evals (requires XAI_API_KEY).
+  # OIDC → record tools/list catalog + run LLM-as-judge (scores/assessments).
+  nexus-catalog:
+    name: Nexus catalog + judges
+    needs: tools-list-validate
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download tools-list artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tools-list
+          path: ci
+
+      - name: Exchange OIDC for Nexus access token
+        id: auth
+        uses: plugin-federation/actions/nexus-oidc-exchange@main
+        with:
+          nexus-url: ${{ vars.NEXUS_URL }}
+          tenant-id: ${{ vars.TENANT_ID }}
+          oidc-audience: ${{ vars.NEXUS_OIDC_AUDIENCE }}
+
+      # Catalog + optional embeddings + judge assessments (prompts from Nexus).
+      - name: Record catalog, embed tools, run judges
+        id: pipeline
+        uses: plugin-federation/actions/mcp-tool-judge-pipeline@main
+        with:
+          nexus-url: ${{ vars.NEXUS_URL }}
+          tenant-id: ${{ vars.TENANT_ID }}
+          source-id: ${{ vars.MCP_SOURCE_ID }}
+          access-token: ${{ steps.auth.outputs['access-token'] }}
+          tools-list-file: ci/tools-list.json
+          source-version: ${{ github.sha }}
+          # Fail the job when any tool is fail/error against judge passThreshold.
+          # Console evidence link below still runs (if: always) so operators can
+          # open opinions even on a red pipeline.
+          fail-on-judge-fail: "true"
+          # Selection-surface embeddings (name + description + input schema).
+          # Posted as tool-embedding-report/v1. Embed failures do not fail judges.
+          # Similarity reports are derived by Nexus, not this job.
+          embedding-model: text-embedding-3-small
+          embedding-provider: openai
+          schema-verify: "true"
+          fail-on-unapproved-schema: "false"
+        env:
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Surface Console catalog evidence link
+        if: ${{ always() && steps.pipeline.outputs['catalog-console-url'] != '' }}
+        run: |
+          echo "::notice title=Console catalog evidence::${{ steps.pipeline.outputs['catalog-console-url'] }}"
+          {
+            echo "## Console catalog evidence"
+            echo
+            echo "[Open catalog evidence & judge opinions](${{ steps.pipeline.outputs['catalog-console-url'] }})"
+            echo
+            echo "- **Catalog digest:** \`${{ steps.pipeline.outputs['catalog-digest'] }}\`"
+            echo "- **Schema verification:** \`${{ steps.pipeline.outputs['verification-id'] }}\` (${{ steps.pipeline.outputs['verification-status'] }})"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+
+  # LLM-backed functional evals (Anthropic evaluations.xml format).
   evals:
     runs-on: ubuntu-latest
     steps:
@@ -75,7 +141,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run evaluations
-        uses: plugin-federation/plugin-federation-actions/actions/anthropic-mcp-eval@main
+        uses: plugin-federation/actions/anthropic-mcp-eval@main
         with:
           evals-dir: ./evals
           transport: ${{ inputs.transport || 'stdio' }}
@@ -84,3 +150,5 @@ jobs:
           provider-model: "xai/grok-build-0.1"
           provider-api-key: ${{ secrets.XAI_API_KEY }}
           provider-api-base: "https://api.x.ai/v1"
+          # Require full suite pass (action default is 100). Any failed task reds CI.
+          accuracy-threshold: "100"
