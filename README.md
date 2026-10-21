@@ -1,6 +1,6 @@
 # meteo-static
 
-Mock meteorological MCP server that serves fixed weather data for locations.
+Mock meteorological MCP server that serves fixed weather data for locations.  
 Used to dogfood Plugin Federation shared Actions (tool listing, schema
 validation, Nexus catalog + judges, embeddings, functional evals).
 
